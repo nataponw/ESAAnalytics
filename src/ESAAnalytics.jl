@@ -3,9 +3,12 @@ module ESAAnalytics
 # Import dependencies =========================================================
 import MultivariateStats
 import UMAP
+import Clustering
 
 # Declare export ==============================================================
 export project_pca, project_umap
+export cluster_kmeans
+export cluster_profiles
 export shapleyvalueanalysis
 
 """
@@ -40,6 +43,35 @@ function project_umap(data::Matrix; dims=2, kwargs...)
     model = UMAP.UMAP_(data, dims; kwargs...)
     projdata = model.embedding
     return projdata
+end
+
+"""
+    cluster_kmeans(data, k)
+
+Cluster `data`, a matrix of (features x observation), into `k` cluster_kmeans
+
+Return `centers`, a matrix of (features x real center), `assignments`, a vector of cluster labels, and `candidatecenters`, indexes of observations that are nearest to respective centers.
+"""
+function cluster_kmeans(data, k)
+    tmp = Clustering.kmeans(data, k)
+    centers = tmp.centers
+    assignments = tmp.assignments
+    costs = tmp.costs
+    # Find candidates for centers from the data
+    idx = zeros(Int, k)
+    for i ∈ 1:k
+        tmpcost = deepcopy(costs)
+        tmpcost[findall(!=(i), assignments)] .= Inf
+        _, idx_i = findmin(tmpcost)
+        idx[i] = idx_i
+    end
+    return (; centers, assignments, candidatecenters=idx)
+end
+
+"""
+"""
+function cluster_profiles()
+    return nothing
 end
 
 """
