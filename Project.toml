@@ -1,7 +1,7 @@
 name = "ESAAnalytics"
 uuid = "ab438be7-21a5-4552-bdb4-455e723b1972"
 authors = ["Natapon Wanapinit"]
-version = "1.0.0-DEV"
+version = "1.0.0"
 
 [compat]
 julia = "1"

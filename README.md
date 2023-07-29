@@ -1,3 +1,7 @@
 # ESAAnalytics
 
-[![Build Status](https://github.com/nataponw/ESAAnalytics.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/nataponw/ESAAnalytics.jl/actions/workflows/CI.yml?query=branch%3Amain)
+## To-Do
+- [ ] Function that map dates to timeseries, cluster them, and plot the cluster group
+- [ ] PCA/TSNE/UMAP Analysis of different energy system KPIs link to regions
+- [x] Shapley value analysis
+- [ ]
