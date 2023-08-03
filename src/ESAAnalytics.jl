@@ -1,13 +1,11 @@
 module ESAAnalytics
 
 # Import dependencies =========================================================
-import MultivariateStats
-import UMAP
-import Clustering
+import MultivariateStats, Statistics, UMAP, Clustering
+import DataFrames
 
 # Declare export ==============================================================
-export project_pca, project_umap
-export cluster_kmeans
+export project_pca, project_umap, cluster_kmeans
 export cluster_profiles
 export shapleyvalueanalysis
 
@@ -46,13 +44,13 @@ function project_umap(data::Matrix; dims=2, kwargs...)
 end
 
 """
-    cluster_kmeans(data, k)
+    cluster_kmeans(data, k::Int)
 
 Cluster `data`, a matrix of (features x observation), into `k` cluster_kmeans
 
 Return `centers`, a matrix of (features x real center), `assignments`, a vector of cluster labels, and `candidatecenters`, indexes of observations that are nearest to respective centers.
 """
-function cluster_kmeans(data, k)
+function cluster_kmeans(data, k::Int)
     tmp = Clustering.kmeans(data, k)
     centers = tmp.centers
     assignments = tmp.assignments
@@ -69,9 +67,31 @@ function cluster_kmeans(data, k)
 end
 
 """
+    cluster_profiles(df::DataFrames.DataFrame, k::Int, sizevector::Int)
+
+TBU
 """
-function cluster_profiles()
-    return nothing
+function cluster_profiles(df::DataFrames.DataFrame, k::Int, sizevector::Int)
+    # Normalize individual profiles
+    normfactor = Dict{Int, NamedTuple}()
+    for (i, col) ∈ zip(1:DataFrames.ncol(df), DataFrames.propertynames(df))
+        μ = Statistics.mean(df[!, col])
+        sd = Statistics.std(df[!, col])
+        normfactor[i] = (;μ, sd, col)
+        df[!, col] = (df[!, col] .- μ)/sd
+    end
+    # Format and process the kmeans clustering
+    data = reshape(df[:, DataFrames.propertynames(df)[1]], sizevector, :)
+    DataFrames.ncol(df) > 1 && [data = vcat(data, reshape(df[:, col], sizevector, :)) for col ∈ DataFrames.propertynames(df)[2:end]]
+    results = cluster_kmeans(data, k)
+    # Reverse the normalization for the centers, and separate individual profiles
+    centers_sep = Dict{Symbol, Matrix{Float64}}()
+    for (i, (μ, sd, col)) ∈ normfactor
+        centers_sep[col] = results.centers[(1:sizevector) .+ (i-1)*sizevector, :]
+        centers_sep[col] .*= sd
+        centers_sep[col] .+= μ
+    end
+    return (;centers=centers_sep, assignments=results.assignments, candidatecenters=results.candidatecenters)
 end
 
 """
