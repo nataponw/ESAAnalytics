@@ -1,7 +1,7 @@
 name = "ESAAnalytics"
 uuid = "919eed96-f9a2-4d6a-a79b-a6a80be1cd14"
 authors = ["Natapon Wanapinit"]
-version = "1.0.0"
+version = "1.0.0"  d
 
 [deps]
 Clustering = "aaaa29a8-35af-508c-8bc3-b662a17a0fe5"
